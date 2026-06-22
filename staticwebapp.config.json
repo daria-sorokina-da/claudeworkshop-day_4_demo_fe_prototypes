@@ -1,0 +1,23 @@
+{
+  "routes": [
+    {
+      "route": "/bulk-actions",
+      "serve": "/bulk-actions/index.html"
+    },
+    {
+      "route": "/bulk-actions/*",
+      "serve": "/bulk-actions/index.html"
+    },
+    {
+      "route": "/schedule",
+      "serve": "/schedule/index.html"
+    },
+    {
+      "route": "/schedule/*",
+      "serve": "/schedule/index.html"
+    }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html"
+  }
+}

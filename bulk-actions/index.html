@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enchanted Stables — Events (Bulk Actions Prototype)</title>
+  <style>
+    /* ── CSS Variables ─────────────────────────────────── */
+    :root {
+      --color-primary:       #4f46e5;
+      --color-primary-hover: #4338ca;
+      --color-primary-light: #eef2ff;
+      --color-text-primary:   #111827;
+      --color-text-secondary: #6b7280;
+      --color-text-muted:     #9ca3af;
+      --color-bg:      #f9fafb;
+      --color-surface: #ffffff;
+      --color-border:  #e5e7eb;
+      --color-sidebar:      #1e293b;
+      --color-sidebar-text: #94a3b8;
+      --sidebar-width: 256px;
+      --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.07), 0 1px 2px -1px rgb(0 0 0 / 0.07);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),  0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Layout ─────────────────────────────────────────── */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2.5rem;
+      min-width: 0;
+      padding-bottom: 7rem; /* space for floating bar */
+    }
+
+    /* ── Sidebar ────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--color-sidebar);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      padding: 1.5rem 0 1rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .sidebar-logo {
+      padding: 0 1.25rem 2rem;
+    }
+
+    .sidebar-logo-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    .sidebar-logo-sub {
+      font-size: 0.72rem;
+      color: var(--color-sidebar-text);
+      margin-top: 0.125rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 0 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: var(--radius-md);
+      color: var(--color-sidebar-text);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+
+    .nav-link:hover {
+      background: rgb(255 255 255 / 0.07);
+      color: #fff;
+    }
+
+    .nav-link.active {
+      background: var(--color-primary);
+      color: #fff;
+    }
+
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .sidebar-menu-btn {
+      margin: 1rem 0.75rem 0;
+      padding: 0.5rem;
+      background: transparent;
+      border: 1px solid rgb(255 255 255 / 0.1);
+      border-radius: var(--radius-md);
+      color: var(--color-sidebar-text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .sidebar-menu-btn:hover {
+      background: rgb(255 255 255 / 0.07);
+      color: #fff;
+    }
+
+    /* ── Page Header ─────────────────────────────────────── */
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+
+    .page-header-text {}
+
+    .page-title {
+      font-size: 1.625rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--color-text-primary);
+    }
+
+    .page-subtitle {
+      margin-top: 0.25rem;
+      font-size: 0.9rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* ── Select Toggle Button ────────────────────────────── */
+    .btn-select-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      box-shadow: var(--shadow-sm);
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 0.2rem;
+    }
+
+    .btn-select-toggle:hover {
+      background: var(--color-bg);
+      color: var(--color-text-primary);
+      border-color: #d1d5db;
+    }
+
+    .btn-select-toggle.active {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      border-color: #c7d2fe;
+    }
+
+    .btn-select-toggle.active:hover {
+      background: #e0e7ff;
+    }
+
+    /* ── Events Grid ─────────────────────────────────────── */
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    /* ── Event Card ──────────────────────────────────────── */
+    .event-card-wrapper {
+      position: relative;
+    }
+
+    .event-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.18s, transform 0.18s, border-color 0.18s;
+      cursor: default;
+      user-select: none;
+    }
+
+    .event-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .select-mode .event-card {
+      cursor: pointer;
+    }
+
+    .select-mode .event-card:hover {
+      border-color: #a5b4fc;
+    }
+
+    .event-card.selected {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgb(79 70 229 / 0.12), var(--shadow-sm);
+      transform: translateY(-2px);
+    }
+
+    /* Inactive event cards */
+    .event-card.inactive {
+      opacity: 0.5;
+    }
+
+    .inactive-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #6b7280;
+      background: #f3f4f6;
+      border-radius: var(--radius-sm);
+      padding: 2px 8px;
+      letter-spacing: 0.03em;
+    }
+
+    /* Card checkbox */
+    .card-checkbox-wrap {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 2;
+      display: none;
+    }
+
+    .select-mode .card-checkbox-wrap {
+      display: flex;
+    }
+
+    .card-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--color-border);
+      border-radius: 4px;
+      background: var(--color-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.12s, border-color 0.12s;
+      flex-shrink: 0;
+    }
+
+    .event-card.selected .card-checkbox {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    .card-checkbox svg {
+      display: none;
+    }
+
+    .event-card.selected .card-checkbox svg {
+      display: block;
+    }
+
+    /* Card sections */
+    .event-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 0.625rem;
+    }
+
+    .event-title {
+      font-size: 0.975rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      line-height: 1.4;
+      margin: 0 0 0.375rem;
+    }
+
+    .event-meta {
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      margin: 0 0 1rem;
+    }
+
+    .event-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .event-date {
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+    }
+
+    /* ── Category Badges ─────────────────────────────────── */
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: var(--radius-sm);
+      padding: 2px 9px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    /* show → purple (like "community") */
+    .category-show      { background: #f5f3ff; color: #5b21b6; }
+    /* trail → green (like "fundraising") */
+    .category-trail     { background: #ecfdf5; color: #065f46; }
+    /* clinic → amber (like "training") */
+    .category-clinic    { background: #fffbeb; color: #92400e; }
+    /* grooming → blue (like "awareness") */
+    .category-grooming  { background: #eff6ff; color: #1e40af; }
+
+    .spots-available {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #059669;
+    }
+
+    .spots-full {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #dc2626;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Floating Action Bar ─────────────────────────────── */
+    .bulk-action-bar {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(calc(100% + 2rem));
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: 0.875rem 1.25rem;
+      box-shadow: var(--shadow-xl);
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      z-index: 50;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+      opacity: 0;
+      pointer-events: none;
+      white-space: nowrap;
+      min-width: 360px;
+    }
+
+    .bulk-action-bar.visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .bulk-count {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      flex: 1;
+    }
+
+    .bulk-count span {
+      color: var(--color-primary);
+    }
+
+    .bulk-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      border: 1px solid transparent;
+      line-height: 1.25;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-text-secondary);
+      border-color: var(--color-border);
+    }
+
+    .btn-ghost:hover {
+      background: var(--color-bg);
+      color: var(--color-text-primary);
+    }
+
+    .btn-danger {
+      background: #dc2626;
+      color: #fff;
+      border-color: #dc2626;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1c;
+      border-color: #b91c1c;
+    }
+
+    .btn-secondary {
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+      border-color: var(--color-border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-secondary:hover {
+      background: var(--color-bg);
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: #fff;
+      border-color: var(--color-primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--color-primary-hover);
+      border-color: var(--color-primary-hover);
+    }
+
+    /* ── Confirmation Dialog ─────────────────────────────── */
+    .dialog-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgb(0 0 0 / 0.35);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s;
+    }
+
+    .dialog-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .dialog {
+      background: var(--color-surface);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xl);
+      padding: 1.75rem;
+      max-width: 440px;
+      width: 100%;
+      transform: scale(0.96) translateY(8px);
+      transition: transform 0.2s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+
+    .dialog-backdrop.open .dialog {
+      transform: scale(1) translateY(0);
+    }
+
+    .dialog-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #fef2f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .dialog-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: #dc2626;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .dialog-title {
+      font-size: 1.0625rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .dialog-body {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      margin-bottom: 1.25rem;
+      line-height: 1.6;
+    }
+
+    .dialog-event-list {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.25rem;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+
+    .dialog-event-item {
+      font-size: 0.82rem;
+      color: var(--color-text-primary);
+      font-weight: 500;
+      padding: 0.25rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .dialog-event-item + .dialog-event-item {
+      border-top: 1px solid var(--color-border);
+    }
+
+    .dialog-event-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #dc2626;
+      flex-shrink: 0;
+    }
+
+    .dialog-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.625rem;
+    }
+
+    /* ── Toast ───────────────────────────────────────────── */
+    .toast-container {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+      pointer-events: none;
+    }
+
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: #111827;
+      color: #fff;
+      border-radius: var(--radius-lg);
+      padding: 0.75rem 1.125rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      transform: translateX(calc(100% + 2rem));
+      opacity: 0;
+      transition: transform 0.3s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.25s;
+      pointer-events: auto;
+      max-width: 320px;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .toast.hide {
+      transform: translateX(calc(100% + 2rem));
+      opacity: 0;
+    }
+
+    .toast-icon {
+      width: 18px;
+      height: 18px;
+      background: #059669;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .toast-icon svg {
+      width: 11px;
+      height: 11px;
+      stroke: #fff;
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* ── Section heading ─────────────────────────────────── */
+    .section-heading {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 1rem;
+    }
+
+    /* ── Select mode header indicator ───────────────────── */
+    .select-mode-hint {
+      font-size: 0.82rem;
+      color: var(--color-primary);
+      background: var(--color-primary-light);
+      border: 1px solid #c7d2fe;
+      border-radius: var(--radius-md);
+      padding: 0.375rem 0.875rem;
+      margin-bottom: 1.25rem;
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      width: fit-content;
+    }
+
+    .select-mode-hint svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--color-primary);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .select-mode .select-mode-hint {
+      display: flex;
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <p class="sidebar-logo-title">Enchanted Stables</p>
+      <p class="sidebar-logo-sub">Staff Portal</p>
+    </div>
+
+    <div class="sidebar-nav">
+      <a class="nav-link" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 3h7v7H3zM13 3h7v7h-7zM3 13h7v7H3zM13 13h7v7h-7z" />
+        </svg>
+        Dashboard
+      </a>
+      <a class="nav-link active" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8 2v3m8-3v3M3 8h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
+        </svg>
+        Events
+      </a>
+      <a class="nav-link" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+        </svg>
+        Staff
+      </a>
+    </div>
+
+    <button class="sidebar-menu-btn" aria-label="Toggle menu">
+      <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </nav>
+
+  <!-- ── Main Content ── -->
+  <main class="main-content" id="mainContent">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-header-text">
+        <h1 class="page-title">Events</h1>
+        <p class="page-subtitle">8 upcoming events · manage scheduling and registration</p>
+      </div>
+      <button class="btn-select-toggle" id="selectToggle" onclick="toggleSelectMode()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 11l3 3L22 4" />
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+        </svg>
+        Select
+      </button>
+    </div>
+
+    <!-- Select mode hint -->
+    <div class="select-mode-hint" id="selectHint">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+      Click cards to select events for bulk actions
+    </div>
+
+    <!-- Events grid -->
+    <div class="section-heading" id="sectionHeading">Upcoming Events (8)</div>
+    <div class="events-grid" id="eventsGrid"></div>
+
+  </main>
+</div>
+
+<!-- ── Floating Action Bar ── -->
+<div class="bulk-action-bar" id="bulkBar">
+  <div class="bulk-count">
+    <span id="selectedCount">0</span> events selected
+  </div>
+  <div class="bulk-actions">
+    <button class="btn btn-ghost" onclick="cancelSelection()">Cancel</button>
+    <button class="btn btn-danger" onclick="openDialog()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"/>
+      </svg>
+      Deactivate
+    </button>
+  </div>
+</div>
+
+<!-- ── Confirmation Dialog ── -->
+<div class="dialog-backdrop" id="dialogBackdrop" onclick="handleBackdropClick(event)">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+    <div class="dialog-icon">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      </svg>
+    </div>
+    <h2 class="dialog-title" id="dialogTitle">Deactivate events?</h2>
+    <p class="dialog-body">
+      The following events will be marked as inactive and hidden from public view.
+      This can be undone later.
+    </p>
+    <div class="dialog-event-list" id="dialogEventList"></div>
+    <div class="dialog-footer">
+      <button class="btn btn-secondary" onclick="closeDialog()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDeactivate()">
+        Deactivate
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast Container ── -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  // ── Seed Data ──────────────────────────────────────────
+  const EVENTS = [
+    {
+      id: 1,
+      title: 'Moonlit Midnight Ride',
+      date: '2025-02-15',
+      location: 'Enchanted Stables, North Paddock',
+      category: 'trail',
+      description: 'An after-dark trail ride through the moonlit grounds. Lanterns provided, hot chocolate at the finish.',
+      spotsTotal: 12,
+      spotsRegistered: 9,
+      isActive: true,
+    },
+    {
+      id: 2,
+      title: 'Spring Foal Showcase',
+      date: '2025-03-08',
+      location: 'Main Arena, Enchanted Stables',
+      category: 'show',
+      description: 'Meet the newest arrivals and watch them trot for the first time in the main arena. Family-friendly event.',
+      spotsTotal: 80,
+      spotsRegistered: 55,
+      isActive: true,
+    },
+    {
+      id: 3,
+      title: 'Bridle & Saddle Clinic',
+      date: '2025-03-15',
+      location: 'Tack Room & Training Ring',
+      category: 'clinic',
+      description: 'Hands-on half-day clinic covering correct fitting, maintenance, and safety checks for bridles and saddles.',
+      spotsTotal: 20,
+      spotsRegistered: 14,
+      isActive: true,
+    },
+    {
+      id: 4,
+      title: 'Young Riders Camp',
+      date: '2025-03-22',
+      location: 'Enchanted Stables — all arenas',
+      category: 'clinic',
+      description: 'Three-day introduction to riding for ages 8–14. Includes grooming, tacking up, and basic dressage moves.',
+      spotsTotal: 15,
+      spotsRegistered: 6,
+      isActive: true,
+    },
+    {
+      id: 5,
+      title: 'Enchanted Trail Challenge',
+      date: '2025-04-05',
+      location: 'Forest Trail, South Paddock',
+      category: 'trail',
+      description: 'A timed 8km trail ride with natural obstacles. Open to intermediate riders and above. Prizes for top three.',
+      spotsTotal: 30,
+      spotsRegistered: 21,
+      isActive: true,
+    },
+    {
+      id: 6,
+      title: 'Summer Dressage Cup',
+      date: '2025-04-12',
+      location: 'Grand Arena, Enchanted Stables',
+      category: 'show',
+      description: 'Annual dressage competition across three divisions: introductory, prelim, and novice.',
+      spotsTotal: 100,
+      spotsRegistered: 100,
+      isActive: true,
+    },
+    {
+      id: 7,
+      title: 'Grooming & Care Day',
+      date: '2025-05-10',
+      location: 'Stable Block A & B',
+      category: 'grooming',
+      description: 'Open stable day — learn coat care, hoof picking, mane braiding, and how to spot early signs of illness.',
+      spotsTotal: 25,
+      spotsRegistered: 18,
+      isActive: true,
+    },
+    {
+      id: 8,
+      title: 'Winter Stable Ball',
+      date: '2025-05-24',
+      location: 'The Old Barn, Enchanted Stables',
+      category: 'show',
+      description: 'End-of-season celebration with awards, a buffet, and a guided tour of the winter quarters by lantern light.',
+      spotsTotal: 60,
+      spotsRegistered: 43,
+      isActive: true,
+    },
+  ];
+
+  const CATEGORY_LABELS = {
+    show:     'Show',
+    trail:    'Trail',
+    clinic:   'Clinic',
+    grooming: 'Grooming',
+  };
+
+  // ── State ──────────────────────────────────────────────
+  let selectMode = false;
+  let selectedIds = new Set();
+  let events = EVENTS.map(e => ({ ...e }));
+
+  // ── Render ─────────────────────────────────────────────
+  function formatDate(iso) {
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function renderCard(event) {
+    const spotsLeft = event.spotsTotal - event.spotsRegistered;
+    const isSelected = selectedIds.has(event.id);
+    const inactiveClass = !event.isActive ? ' inactive' : '';
+    const selectedClass = isSelected ? ' selected' : '';
+
+    return `
+      <div class="event-card-wrapper">
+        <div
+          class="event-card${inactiveClass}${selectedClass}"
+          data-id="${event.id}"
+          onclick="handleCardClick(${event.id})"
+          role="${selectMode ? 'checkbox' : 'article'}"
+          aria-checked="${isSelected}"
+          tabindex="${selectMode ? '0' : '-1'}"
+          onkeydown="if(event.key==='Enter'||event.key===' '){handleCardClick(${event.id});event.preventDefault()}"
+        >
+          <div class="card-checkbox-wrap" onclick="handleCardClick(${event.id}); event.stopPropagation()">
+            <div class="card-checkbox" aria-hidden="true">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+            </div>
+          </div>
+          <div class="event-card-top">
+            <span class="category-badge category-${event.category}">
+              ${CATEGORY_LABELS[event.category]}
+            </span>
+            <span class="event-date">${formatDate(event.date)}</span>
+          </div>
+          <h3 class="event-title">${event.title}</h3>
+          <p class="event-meta">${event.location}</p>
+          <div class="event-footer">
+            ${!event.isActive
+              ? '<span class="inactive-badge">Inactive</span>'
+              : spotsLeft > 0
+                ? `<span class="spots-available">${spotsLeft} spots left</span>`
+                : '<span class="spots-full">FULL</span>'
+            }
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function render() {
+    const grid = document.getElementById('eventsGrid');
+    const mainContent = document.getElementById('mainContent');
+    const selectToggle = document.getElementById('selectToggle');
+    const bulkBar = document.getElementById('bulkBar');
+    const countEl = document.getElementById('selectedCount');
+    const heading = document.getElementById('sectionHeading');
+
+    // Grid
+    grid.innerHTML = events.map(renderCard).join('');
+
+    // Section heading
+    const activeCount = events.filter(e => e.isActive).length;
+    heading.textContent = `Upcoming Events (${activeCount})`;
+
+    // Select mode class on main content
+    if (selectMode) {
+      mainContent.classList.add('select-mode');
+      selectToggle.classList.add('active');
+      selectToggle.innerHTML = `
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+        Done
+      `;
+    } else {
+      mainContent.classList.remove('select-mode');
+      selectToggle.classList.remove('active');
+      selectToggle.innerHTML = `
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 11l3 3L22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+        Select
+      `;
+    }
+
+    // Floating bar
+    const count = selectedIds.size;
+    countEl.textContent = count;
+    if (count > 0 && selectMode) {
+      bulkBar.classList.add('visible');
+    } else {
+      bulkBar.classList.remove('visible');
+    }
+  }
+
+  // ── Interactions ───────────────────────────────────────
+  function toggleSelectMode() {
+    selectMode = !selectMode;
+    if (!selectMode) {
+      selectedIds.clear();
+    }
+    render();
+  }
+
+  function handleCardClick(id) {
+    if (!selectMode) return;
+    if (selectedIds.has(id)) {
+      selectedIds.delete(id);
+    } else {
+      selectedIds.add(id);
+    }
+    render();
+  }
+
+  function cancelSelection() {
+    selectedIds.clear();
+    selectMode = false;
+    render();
+  }
+
+  // ── Dialog ─────────────────────────────────────────────
+  function openDialog() {
+    const selected = events.filter(e => selectedIds.has(e.id));
+    const listEl = document.getElementById('dialogEventList');
+    const titleEl = document.getElementById('dialogTitle');
+
+    titleEl.textContent = `Deactivate ${selected.length} event${selected.length !== 1 ? 's' : ''}?`;
+
+    listEl.innerHTML = selected.map(e => `
+      <div class="dialog-event-item">
+        <div class="dialog-event-dot"></div>
+        ${e.title}
+      </div>
+    `).join('');
+
+    document.getElementById('dialogBackdrop').classList.add('open');
+  }
+
+  function closeDialog() {
+    document.getElementById('dialogBackdrop').classList.remove('open');
+  }
+
+  function handleBackdropClick(e) {
+    if (e.target === document.getElementById('dialogBackdrop')) {
+      closeDialog();
+    }
+  }
+
+  function confirmDeactivate() {
+    const count = selectedIds.size;
+    // Update state
+    events = events.map(e =>
+      selectedIds.has(e.id) ? { ...e, isActive: false } : e
+    );
+    const ids = new Set(selectedIds);
+    selectedIds.clear();
+    selectMode = false;
+
+    closeDialog();
+    render();
+    showToast(count);
+  }
+
+  // ── Toast ──────────────────────────────────────────────
+  function showToast(count) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `
+      <div class="toast-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>
+      </div>
+      ${count} event${count !== 1 ? 's' : ''} deactivated successfully
+    `;
+    container.appendChild(toast);
+
+    // Trigger enter animation
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        toast.classList.add('show');
+      });
+    });
+
+    // Exit after 3.5s
+    setTimeout(() => {
+      toast.classList.remove('show');
+      toast.classList.add('hide');
+      setTimeout(() => toast.remove(), 350);
+    }, 3500);
+  }
+
+  // ── Keyboard: close dialog on Escape ──────────────────
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (document.getElementById('dialogBackdrop').classList.contains('open')) {
+        closeDialog();
+      }
+    }
+  });
+
+  // ── Initial render ─────────────────────────────────────
+  render();
+</script>
+</body>
+</html>
