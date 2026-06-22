@@ -4,9 +4,9 @@ A shared repository of clickable HTML prototypes for the Enchanted Stables staff
 
 ## What's here
 
-Each folder contains a complete, runnable prototype for a feature or page:
+Each folder contains a complete, runnable prototype for a feature or page.
 
-- **`schedule/`** — Weekly staff duty roster. View the roster, click staff members to see their details, and remove them from scheduled days.
+_No prototypes have been added yet — see [Creating a new prototype](#creating-a-new-prototype) below._
 
 ## How to use a prototype
 

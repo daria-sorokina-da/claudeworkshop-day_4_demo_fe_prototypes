@@ -348,26 +348,9 @@
   </div>
 
   <script>
-    const prototypes = [
-      {
-        id: 'bulk-actions',
-        title: 'Bulk Actions — Events',
-        category: 'events',
-        description: 'Select multiple events and deactivate them in one action. Includes a floating action bar, confirmation dialog, and success toast.',
-        status: 'approved',
-        flow: 'Select mode toggle → checkbox selection → floating action bar → confirm dialog → success toast',
-        href: './bulk-actions/index.html'
-      },
-      {
-        id: 'schedule',
-        title: 'Staff Duty Roster',
-        category: 'schedule',
-        description: 'Weekly roster showing which staff members are on duty each day. Click a staff member to view their details or remove them from a shift.',
-        status: 'approved',
-        flow: 'View roster → click staff member → detail panel → remove from day',
-        href: './schedule/index.html'
-      }
-    ];
+    // Add a prototype by pushing an object here and creating its folder + route.
+    // Shape: { id, title, category, description, status, flow, href }
+    const prototypes = [];
 
     const accentMap = { events: 'accent-events', schedule: 'accent-schedule', staff: 'accent-staff' };
     const statusMap = { approved: ['badge-approved', 'Approved'], draft: ['badge-draft', 'Draft'], wip: ['badge-wip', 'WIP'] };
@@ -379,7 +362,14 @@
       const visible = activeFilter === 'all' ? prototypes : prototypes.filter(p => p.category === activeFilter);
 
       if (!visible.length) {
-        container.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">No prototypes in this category yet</div><p>More coming soon.</p></div>';
+        const isGalleryEmpty = prototypes.length === 0;
+        const icon  = isGalleryEmpty ? '📭' : '🔍';
+        const title = isGalleryEmpty ? 'No prototypes yet' : 'Nothing in this category yet';
+        const body  = isGalleryEmpty
+          ? 'Add a prototype folder with an <code>index.html</code>, register it in the <code>prototypes</code> list in this file, and add its route to <code>staticwebapp.config.json</code>. It’ll appear here automatically.'
+          : 'Try a different category, or add a prototype in this one.';
+        container.innerHTML =
+          `<div class="empty"><div class="empty-icon">${icon}</div><div class="empty-title">${title}</div><p>${body}</p></div>`;
         return;
       }
 
