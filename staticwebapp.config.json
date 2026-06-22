@@ -1,5 +1,7 @@
 {
-  "routes": [],
+  "routes": [
+    { "route": "/schedule", "rewrite": "/schedule/index.html" }
+  ],
   "navigationFallback": {
     "rewrite": "/index.html"
   }

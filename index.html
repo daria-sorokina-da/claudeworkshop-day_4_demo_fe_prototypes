@@ -277,7 +277,17 @@
   <script>
     // Add a prototype by pushing an object here and creating its folder + route.
     // Shape: { id, title, category, description, status, flow, href }
-    const prototypes = [];
+    const prototypes = [
+      {
+        id: 'schedule',
+        title: 'Weekly Schedule',
+        category: 'schedule',
+        description: 'Weekly staff duty roster with a 7-day calendar grid. Click any name to open a details panel, and remove staff from a day\'s roster.',
+        status: 'approved',
+        flow: 'View week → click staff pill → inspect details → remove from schedule',
+        href: '/schedule'
+      }
+    ];
 
     const covers = {
       events:   'linear-gradient(135deg,#7c3aed,#a855f7)',

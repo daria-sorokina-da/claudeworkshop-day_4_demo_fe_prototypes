@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Schedule · Enchanted Stables Staff Portal</title>
+<style>
+  :root {
+    --color-primary:       #4f46e5;
+    --color-primary-hover: #4338ca;
+    --color-primary-light: #eef2ff;
+
+    --color-text-primary:   #111827;
+    --color-text-secondary: #6b7280;
+    --color-text-muted:     #9ca3af;
+
+    --color-bg:      #f9fafb;
+    --color-surface: #ffffff;
+    --color-border:  #e5e7eb;
+
+    --color-sidebar:      #1e293b;
+    --color-sidebar-text: #94a3b8;
+    --sidebar-width:      256px;
+
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.07), 0 1px 2px -1px rgb(0 0 0 / 0.07);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),  0 2px 4px -2px  rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+
+    --role-manager-bg:   #ecfdf5; --role-manager-color:   #065f46;
+    --role-rider-bg:     #eff6ff; --role-rider-color:     #1e40af;
+    --role-groom-bg:     #f5f3ff; --role-groom-color:     #5b21b6;
+    --role-farrier-bg:   #fffbeb; --role-farrier-color:   #92400e;
+    --role-photo-bg:     #fdf2f8; --role-photo-color:     #9d174d;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout ───────────────────────────────────────────── */
+  .layout { display: flex; min-height: 100vh; }
+  .main-content { flex: 1; overflow-y: auto; padding: 2.5rem; min-width: 0; }
+
+  /* ── Sidebar ──────────────────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-width);
+    background: var(--color-sidebar);
+    display: flex; flex-direction: column; flex-shrink: 0;
+    padding: 1.5rem 0 1rem;
+    position: sticky; top: 0; height: 100vh;
+  }
+  .sidebar-logo { padding: 0 1.25rem 2rem; }
+  .sidebar-logo-title { font-size: 1rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
+  .sidebar-logo-sub {
+    font-size: 0.72rem; color: var(--color-sidebar-text); margin-top: 0.125rem;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .sidebar-nav { flex: 1; padding: 0 0.75rem; display: flex; flex-direction: column; gap: 0.125rem; }
+  .nav-link {
+    display: flex; align-items: center; gap: 0.625rem;
+    padding: 0.6rem 0.75rem; border-radius: var(--radius-md);
+    color: var(--color-sidebar-text); text-decoration: none;
+    font-size: 0.875rem; font-weight: 500; transition: background 0.15s, color 0.15s;
+  }
+  .nav-link:hover { background: rgb(255 255 255 / 0.07); color: #fff; }
+  .nav-link.active { background: var(--color-primary); color: #fff; }
+  .nav-icon {
+    width: 18px; height: 18px; flex-shrink: 0; fill: none; stroke: currentColor;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* ── Page header ──────────────────────────────────────── */
+  .page-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;
+  }
+  .page-header-text {}
+  .page-title { font-size: 1.625rem; font-weight: 700; letter-spacing: -0.025em; }
+  .page-subtitle { margin-top: 0.25rem; font-size: 0.9rem; color: var(--color-text-secondary); }
+
+  .week-nav {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg); padding: 0.4rem 0.75rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .week-nav-label { font-size: 0.875rem; font-weight: 600; color: var(--color-text-primary); white-space: nowrap; }
+  .week-nav-btn {
+    background: none; border: none; cursor: pointer; padding: 0.25rem;
+    color: var(--color-text-secondary); border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+  .week-nav-btn:hover { background: var(--color-bg); color: var(--color-primary); }
+
+  /* ── Calendar grid ────────────────────────────────────── */
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.875rem;
+  }
+
+  .day-col {
+    display: flex; flex-direction: column; gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .day-header {
+    text-align: center; padding: 0.6rem 0.5rem;
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+  }
+  .day-header.today {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+  .day-name {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--color-text-secondary);
+  }
+  .day-header.today .day-name { color: rgba(255,255,255,0.75); }
+  .day-date {
+    font-size: 1.25rem; font-weight: 700; line-height: 1.2;
+    color: var(--color-text-primary); margin-top: 0.1rem;
+  }
+  .day-header.today .day-date { color: #fff; }
+
+  .day-body {
+    flex: 1; display: flex; flex-direction: column; gap: 0.5rem;
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg); padding: 0.75rem;
+    box-shadow: var(--shadow-sm); min-height: 240px;
+  }
+
+  /* ── Staff pill in calendar ───────────────────────────── */
+  .staff-pill {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.45rem 0.6rem; border-radius: var(--radius-md);
+    border: 1px solid var(--color-border); background: var(--color-bg);
+    cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s, background 0.15s;
+    min-width: 0;
+  }
+  .staff-pill:hover {
+    border-color: var(--color-primary); background: var(--color-primary-light);
+    box-shadow: 0 0 0 2px var(--color-primary-light);
+  }
+  .staff-pill.selected {
+    border-color: var(--color-primary); background: var(--color-primary-light);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+  }
+  .pill-avatar {
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 700; color: #fff; letter-spacing: 0.02em;
+  }
+  .pill-name {
+    font-size: 0.78rem; font-weight: 600; color: var(--color-text-primary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+  }
+
+  /* ── Side panel ───────────────────────────────────────── */
+  .side-panel-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgb(0 0 0 / 0.25);
+    z-index: 40;
+    backdrop-filter: blur(2px);
+  }
+  .side-panel-backdrop.open { display: block; }
+
+  .side-panel {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 360px; max-width: 95vw;
+    background: var(--color-surface);
+    border-left: 1px solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+    z-index: 50;
+    display: flex; flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+  }
+  .side-panel.open { transform: translateX(0); }
+
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+  }
+  .panel-title { font-size: 1rem; font-weight: 700; }
+  .panel-close {
+    background: none; border: none; cursor: pointer; padding: 0.3rem;
+    color: var(--color-text-secondary); border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+  .panel-close:hover { background: var(--color-bg); color: var(--color-text-primary); }
+
+  .panel-body { flex: 1; overflow-y: auto; padding: 1.5rem; }
+
+  .panel-avatar-row {
+    display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;
+  }
+  .panel-avatar {
+    width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.15rem; font-weight: 700; color: #fff;
+  }
+  .panel-name { font-size: 1.15rem; font-weight: 700; }
+  .panel-email { font-size: 0.83rem; color: var(--color-text-secondary); margin-top: 0.125rem; }
+
+  .detail-list { display: flex; flex-direction: column; gap: 0.875rem; margin-bottom: 1.75rem; }
+  .detail-row { display: flex; flex-direction: column; gap: 0.2rem; }
+  .detail-label {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--color-text-secondary);
+  }
+  .detail-value { font-size: 0.9rem; color: var(--color-text-primary); font-weight: 500; }
+
+  .panel-day-label {
+    font-size: 0.75rem; font-weight: 600; color: var(--color-text-secondary);
+    margin-bottom: 0.35rem;
+  }
+  .panel-day-chip {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: var(--color-primary-light); color: var(--color-primary);
+    border-radius: var(--radius-md); padding: 0.35rem 0.7rem;
+    font-size: 0.8rem; font-weight: 600; margin-bottom: 1.75rem;
+  }
+
+  .role-badge {
+    display: inline-flex; align-items: center; border-radius: var(--radius-sm);
+    padding: 2px 9px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em; white-space: nowrap;
+  }
+  .role-stable-manager { background: var(--role-manager-bg); color: var(--role-manager-color); }
+  .role-rider          { background: var(--role-rider-bg);   color: var(--role-rider-color); }
+  .role-groom          { background: var(--role-groom-bg);   color: var(--role-groom-color); }
+  .role-farrier        { background: var(--role-farrier-bg); color: var(--role-farrier-color); }
+  .role-photographer   { background: var(--role-photo-bg);   color: var(--role-photo-color); }
+
+  .panel-footer {
+    padding: 1.25rem 1.5rem; border-top: 1px solid var(--color-border); flex-shrink: 0;
+  }
+  .btn-remove {
+    width: 100%; padding: 0.65rem 1rem;
+    background: #fff1f2; color: #be123c;
+    border: 1px solid #fecdd3; border-radius: var(--radius-md);
+    font: inherit; font-size: 0.875rem; font-weight: 600;
+    cursor: pointer; transition: background 0.15s, border-color 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  }
+  .btn-remove:hover { background: #ffe4e6; border-color: #fca5a5; }
+
+  /* ── Removed toast ────────────────────────────────────── */
+  .toast {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(120%);
+    background: #111827; color: #fff; border-radius: var(--radius-lg);
+    padding: 0.7rem 1.25rem; font-size: 0.875rem; font-weight: 500;
+    box-shadow: var(--shadow-lg); z-index: 99;
+    transition: transform 0.25s ease;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-title">🐴 Enchanted Stables</div>
+      <div class="sidebar-logo-sub">Staff Portal</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-link">
+        <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="#" class="nav-link">
+        <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Events
+      </a>
+      <a href="#" class="nav-link active">
+        <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14" stroke-width="2.5"/><line x1="12" y1="14" x2="12" y2="14" stroke-width="2.5"/><line x1="16" y1="14" x2="16" y2="14" stroke-width="2.5"/><line x1="8" y1="18" x2="8" y2="18" stroke-width="2.5"/><line x1="12" y1="18" x2="12" y2="18" stroke-width="2.5"/></svg>
+        Schedule
+      </a>
+      <a href="#" class="nav-link">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Staff
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <div class="page-header">
+      <div class="page-header-text">
+        <h1 class="page-title">Schedule</h1>
+        <p class="page-subtitle">Weekly staff duty roster — click any name to view details</p>
+      </div>
+      <div class="week-nav">
+        <button class="week-nav-btn" id="prevWeek" title="Previous week">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <span class="week-nav-label" id="weekLabel">Loading…</span>
+        <button class="week-nav-btn" id="nextWeek" title="Next week">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="calendar-grid" id="calendarGrid"></div>
+  </main>
+</div>
+
+<!-- Side panel backdrop -->
+<div class="side-panel-backdrop" id="backdrop"></div>
+
+<!-- Side panel -->
+<aside class="side-panel" id="sidePanel">
+  <div class="panel-header">
+    <span class="panel-title">Staff Details</span>
+    <button class="panel-close" id="panelClose">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+  <div class="panel-footer">
+    <button class="btn-remove" id="removeBtn">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      Remove from schedule
+    </button>
+  </div>
+</aside>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Mock data ────────────────────────────────────────────
+  const STAFF = [
+    { id: 1,  name: 'Aoife Brennan',    email: 'aoife.brennan@enchantedstables.ie',    role: 'Stable Manager', joinedAt: '2019-03-14', eventsCount: 42, color: '#6d28d9' },
+    { id: 2,  name: 'Ciarán Kelly',     email: 'ciaran.kelly@enchantedstables.ie',     role: 'Rider',          joinedAt: '2021-07-01', eventsCount: 28, color: '#0284c7' },
+    { id: 3,  name: 'Siobhán Murphy',   email: 'siobhan.murphy@enchantedstables.ie',   role: 'Groom',          joinedAt: '2022-01-10', eventsCount: 15, color: '#059669' },
+    { id: 4,  name: 'Fionnuala Hayes',  email: 'fionnuala.hayes@enchantedstables.ie',  role: 'Farrier',        joinedAt: '2020-09-22', eventsCount: 31, color: '#d97706' },
+    { id: 5,  name: 'Pádraig Walsh',    email: 'padraig.walsh@enchantedstables.ie',    role: 'Rider',          joinedAt: '2023-02-05', eventsCount: 9,  color: '#0891b2' },
+    { id: 6,  name: 'Niamh O\'Brien',   email: 'niamh.obrien@enchantedstables.ie',     role: 'Photographer',   joinedAt: '2021-11-30', eventsCount: 22, color: '#be185d' },
+    { id: 7,  name: 'Eoghan Doyle',     email: 'eoghan.doyle@enchantedstables.ie',     role: 'Groom',          joinedAt: '2022-06-17', eventsCount: 11, color: '#7c3aed' },
+    { id: 8,  name: 'Roisín Fitzpatrick',email:'roisin.fitzpatrick@enchantedstables.ie',role:'Rider',          joinedAt: '2020-04-08', eventsCount: 37, color: '#0f766e' },
+    { id: 9,  name: 'Seán Burke',       email: 'sean.burke@enchantedstables.ie',       role: 'Stable Manager', joinedAt: '2018-12-01', eventsCount: 54, color: '#4338ca' },
+    { id: 10, name: 'Caoimhe Ryan',     email: 'caoimhe.ryan@enchantedstables.ie',     role: 'Groom',          joinedAt: '2023-08-14', eventsCount: 6,  color: '#b45309' },
+  ];
+
+  // Fixed weekly roster: each day index (0=Mon … 6=Sun) maps to 2–3 staff IDs
+  const WEEKLY_ROSTER = {
+    0: [9, 1, 3],   // Mon
+    1: [2, 6],       // Tue
+    2: [4, 8, 10],  // Wed
+    3: [1, 5, 7],   // Thu
+    4: [9, 3],       // Fri
+    5: [2, 6, 8],   // Sat
+    6: [4, 10],      // Sun
+  };
+
+  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  const roleClass = {
+    'Stable Manager': 'role-stable-manager',
+    'Rider':          'role-rider',
+    'Groom':          'role-groom',
+    'Farrier':        'role-farrier',
+    'Photographer':   'role-photographer',
+  };
+
+  function initials(name) {
+    return name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+  }
+
+  function formatDate(date) {
+    return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+  }
+
+  // ── Week offset (0 = current week) ───────────────────────
+  let weekOffset = 0;
+  // Track removed assignments: Set of `${dayIndex}-${staffId}`
+  const removed = new Set();
+
+  function getMondayOf(offset) {
+    const now = new Date();
+    const day = now.getDay(); // 0=Sun … 6=Sat
+    const diffToMon = (day === 0) ? -6 : 1 - day;
+    const mon = new Date(now);
+    mon.setDate(now.getDate() + diffToMon + offset * 7);
+    mon.setHours(0, 0, 0, 0);
+    return mon;
+  }
+
+  // ── State ─────────────────────────────────────────────────
+  let selectedKey = null; // `${dayIndex}-${staffId}`
+
+  // ── Panel ─────────────────────────────────────────────────
+  const panel     = document.getElementById('sidePanel');
+  const backdrop  = document.getElementById('backdrop');
+  const panelBody = document.getElementById('panelBody');
+  const removeBtn = document.getElementById('removeBtn');
+  const toast     = document.getElementById('toast');
+
+  function openPanel(dayIndex, staff, dateLabel) {
+    const key = `${dayIndex}-${staff.id}`;
+    selectedKey = key;
+    updateSelectedPills();
+
+    panelBody.innerHTML = `
+      <div class="panel-avatar-row">
+        <div class="panel-avatar" style="background:${staff.color}">${initials(staff.name)}</div>
+        <div>
+          <div class="panel-name">${staff.name}</div>
+          <div class="panel-email">${staff.email}</div>
+        </div>
+      </div>
+
+      <div class="panel-day-label">Scheduled for</div>
+      <div class="panel-day-chip">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        ${DAYS[dayIndex]}, ${dateLabel}
+      </div>
+
+      <div class="detail-list">
+        <div class="detail-row">
+          <span class="detail-label">Role</span>
+          <span class="detail-value"><span class="role-badge ${roleClass[staff.role] || ''}">${staff.role}</span></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Email</span>
+          <span class="detail-value">${staff.email}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Joined</span>
+          <span class="detail-value">${staff.joinedAt}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Events attended</span>
+          <span class="detail-value">${staff.eventsCount}</span>
+        </div>
+      </div>
+    `;
+
+    panel.classList.add('open');
+    backdrop.classList.add('open');
+  }
+
+  function closePanel() {
+    panel.classList.remove('open');
+    backdrop.classList.remove('open');
+    selectedKey = null;
+    updateSelectedPills();
+  }
+
+  function updateSelectedPills() {
+    document.querySelectorAll('.staff-pill').forEach(el => {
+      el.classList.toggle('selected', el.dataset.key === selectedKey);
+    });
+  }
+
+  removeBtn.addEventListener('click', () => {
+    if (!selectedKey) return;
+    removed.add(selectedKey);
+    const [dayIdx, staffId] = selectedKey.split('-').map(Number);
+    const staff = STAFF.find(s => s.id === staffId);
+    closePanel();
+    renderCalendar();
+    showToast(`${staff.name} removed from ${DAYS[dayIdx]}'s schedule`);
+  });
+
+  document.getElementById('panelClose').addEventListener('click', closePanel);
+  backdrop.addEventListener('click', closePanel);
+
+  // ── Toast ─────────────────────────────────────────────────
+  let toastTimer;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  // ── Week navigation ───────────────────────────────────────
+  document.getElementById('prevWeek').addEventListener('click', () => { weekOffset--; renderCalendar(); });
+  document.getElementById('nextWeek').addEventListener('click', () => { weekOffset++; renderCalendar(); });
+
+  // ── Render ────────────────────────────────────────────────
+  function renderCalendar() {
+    const monday = getMondayOf(weekOffset);
+    const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+    document.getElementById('weekLabel').textContent =
+      `${formatDate(monday)} – ${formatDate(sunday)}`;
+
+    const today = new Date(); today.setHours(0,0,0,0);
+    const grid  = document.getElementById('calendarGrid');
+
+    grid.innerHTML = DAYS.map((dayName, i) => {
+      const date = new Date(monday); date.setDate(monday.getDate() + i);
+      const isToday = date.getTime() === today.getTime();
+      const roster = WEEKLY_ROSTER[i] || [];
+      const visible = roster.filter(id => !removed.has(`${i}-${id}`));
+
+      const pills = visible.map(id => {
+        const s = STAFF.find(m => m.id === id);
+        if (!s) return '';
+        const key = `${i}-${id}`;
+        return `
+          <button class="staff-pill${selectedKey === key ? ' selected' : ''}"
+                  data-day="${i}" data-staff="${id}" data-date="${formatDate(date)}" data-key="${key}">
+            <div class="pill-avatar" style="background:${s.color}">${initials(s.name)}</div>
+            <span class="pill-name">${s.name}</span>
+          </button>`;
+      }).join('');
+
+      return `
+        <div class="day-col">
+          <div class="day-header${isToday ? ' today' : ''}">
+            <div class="day-name">${dayName}</div>
+            <div class="day-date">${date.getDate()}</div>
+          </div>
+          <div class="day-body">${pills || '<span style="font-size:0.78rem;color:var(--color-text-muted);margin-top:0.25rem;">No staff assigned</span>'}</div>
+        </div>`;
+    }).join('');
+
+    // Attach pill click handlers
+    grid.querySelectorAll('.staff-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const dayIndex  = Number(btn.dataset.day);
+        const staffId   = Number(btn.dataset.staff);
+        const dateLabel = btn.dataset.date;
+        const staff     = STAFF.find(s => s.id === staffId);
+        if (selectedKey === btn.dataset.key) { closePanel(); return; }
+        openPanel(dayIndex, staff, dateLabel);
+      });
+    });
+  }
+
+  renderCalendar();
+</script>
+</body>
+</html>
