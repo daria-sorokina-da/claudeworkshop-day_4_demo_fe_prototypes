@@ -8,17 +8,18 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --color-primary:       #4f46e5;
-      --color-primary-hover: #4338ca;
-      --color-primary-light: #eef2ff;
-      --color-text:          #111827;
-      --color-text-secondary:#6b7280;
-      --color-text-muted:    #9ca3af;
-      --color-bg:            #f9fafb;
+      /* Gallery identity — warm stone + teal, deliberately distinct from the app's indigo/slate */
+      --color-primary:       #0d9488;
+      --color-primary-hover: #0f766e;
+      --color-primary-light: #ccfbf1;
+      --color-text:          #1c1917;
+      --color-text-secondary:#78716c;
+      --color-text-muted:    #a8a29e;
+      --color-bg:            #faf9f7;
       --color-surface:       #ffffff;
-      --color-border:        #e5e7eb;
-      --color-sidebar:       #1e293b;
-      --color-sidebar-text:  #94a3b8;
+      --color-border:        #e7e5e4;
+      --color-sidebar:       #1c1917;
+      --color-sidebar-text:  #a8a29e;
       --radius-md:  0.5rem;
       --radius-lg:  0.75rem;
       --shadow-sm:  0 1px 3px 0 rgb(0 0 0/.07), 0 1px 2px -1px rgb(0 0 0/.07);
@@ -111,7 +112,7 @@
     }
 
     .nav-item:hover { background: rgba(255,255,255,0.07); color: #e2e8f0; }
-    .nav-item.active { background: rgba(79,70,229,0.25); color: #a5b4fc; }
+    .nav-item.active { background: rgba(13,148,136,0.28); color: #5eead4; }
 
     /* ── Main ─────────────────────────────────────────── */
     .main {
@@ -266,7 +267,7 @@
 
     .badge-approved { background: #dcfce7; color: #15803d; }
     .badge-draft    { background: #fef9c3; color: #a16207; }
-    .badge-wip      { background: #e0e7ff; color: #4338ca; }
+    .badge-wip      { background: #ccfbf1; color: #0f766e; }
 
     .open-link {
       display: inline-flex;
@@ -288,10 +289,10 @@
     .empty-title { font-size: 1rem; font-weight: 600; color: var(--color-text); margin-bottom: 0.35rem; }
 
     /* ── Color accents per category ───────────────────── */
-    .accent-events   { background: #4f46e5; }
-    .accent-schedule { background: #0891b2; }
-    .accent-staff    { background: #059669; }
-    .accent-other    { background: #9333ea; }
+    .accent-events   { background: #0d9488; }
+    .accent-schedule { background: #ca8a04; }
+    .accent-staff    { background: #be123c; }
+    .accent-other    { background: #7c3aed; }
   </style>
 </head>
 <body>
