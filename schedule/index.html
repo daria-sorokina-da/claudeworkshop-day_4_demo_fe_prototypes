@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Staff Schedule — Enchanted Stables</title>
+  <style>
+    :root {
+      --color-primary: #4f46e5;
+      --color-primary-hover: #4338ca;
+      --color-primary-light: #eef2ff;
+      --color-success: #10b981;
+      --color-warning: #f59e0b;
+      --color-text-primary: #111827;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-bg: #f9fafb;
+      --color-surface: #ffffff;
+      --color-border: #e5e7eb;
+      --color-sidebar: #1e293b;
+      --color-sidebar-text: #94a3b8;
+      --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.07), 0 1px 2px -1px rgb(0 0 0 / 0.07);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .layout {
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 240px;
+      background: var(--color-sidebar);
+      color: var(--color-sidebar-text);
+      padding: 1.5rem 1rem;
+      overflow-y: auto;
+      border-right: 1px solid #0f172a;
+    }
+
+    .sidebar-logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 2rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .sidebar-link {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      color: inherit;
+      text-decoration: none;
+      transition: background 0.2s;
+      font-size: 0.875rem;
+    }
+
+    .sidebar-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-link.active {
+      background: var(--color-primary);
+      color: #fff;
+    }
+
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem;
+    }
+
+    .header {
+      margin-bottom: 2rem;
+    }
+
+    .header-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .header-subtitle {
+      color: var(--color-text-secondary);
+    }
+
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+      background: var(--color-primary-light);
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    .schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .schedule-table th {
+      padding: 0.75rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      border-bottom: 2px solid var(--color-border);
+      background: var(--color-bg);
+    }
+
+    .schedule-table td {
+      padding: 1rem 0.75rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .schedule-table tbody tr:hover {
+      background: var(--color-bg);
+      cursor: pointer;
+    }
+
+    .staff-name {
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius-md);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .duty-cell {
+      text-align: center;
+      font-size: 0.875rem;
+    }
+
+    .duty-assigned {
+      background: var(--color-success);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius-md);
+      font-weight: 500;
+      display: inline-block;
+    }
+
+    .duty-available {
+      color: var(--color-text-muted);
+      font-size: 0.75rem;
+    }
+
+    .detail-panel {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      display: none;
+    }
+
+    .detail-panel.active {
+      display: block;
+      animation: slideIn 0.2s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .detail-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      transition: color 0.2s;
+    }
+
+    .close-btn:hover {
+      color: var(--color-text-primary);
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .detail-value {
+      font-size: 1rem;
+      color: var(--color-text-primary);
+    }
+
+    .event-list {
+      list-style: none;
+    }
+
+    .event-item {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .event-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .event-title {
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .event-date {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .event-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: var(--color-warning);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius-md);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .back-link {
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    .back-link:hover {
+      color: var(--color-primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">🐴 Stables</div>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link">Dashboard</a>
+      <a href="#" class="sidebar-link">Events</a>
+      <a href="#" class="sidebar-link active">Schedule</a>
+      <a href="#" class="sidebar-link">Staff</a>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <div class="header">
+      <h1 class="header-title">Staff Schedule</h1>
+      <p class="header-subtitle">Weekly duty roster for upcoming events</p>
+    </div>
+
+    <!-- Schedule Table -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Week of June 24–30, 2026</h2>
+      </div>
+      <div class="card-body">
+        <table class="schedule-table">
+          <thead>
+            <tr>
+              <th>Staff Member</th>
+              <th>Role</th>
+              <th style="text-align: center;">Mon 24</th>
+              <th style="text-align: center;">Tue 25</th>
+              <th style="text-align: center;">Wed 26</th>
+              <th style="text-align: center;">Thu 27</th>
+              <th style="text-align: center;">Fri 28</th>
+              <th style="text-align: center;">Sat 29</th>
+            </tr>
+          </thead>
+          <tbody id="scheduleBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="detail-panel" id="detailPanel">
+      <a class="back-link" onclick="closeDetail()">← Back to Schedule</a>
+      <div class="detail-header">
+        <div class="detail-name" id="detailName">Alex Morgan</div>
+        <button class="close-btn" onclick="closeDetail()">×</button>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-field">
+          <div class="detail-label">Role</div>
+          <div class="detail-value" id="detailRole">Head Groom</div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-label">Email</div>
+          <div class="detail-value" id="detailEmail">alex@stables.local</div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-label">Member Since</div>
+          <div class="detail-value" id="detailJoinedAt">Jan 15, 2023</div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-label">Events Attended</div>
+          <div class="detail-value" id="detailEventsCount">12</div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="font-weight: 600; margin-bottom: 1rem;">Upcoming Events</h3>
+        <ul class="event-list" id="eventList">
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STAFF = [
+    {
+      id: 1,
+      name: 'Alex Morgan',
+      email: 'alex@stables.local',
+      role: 'Head Groom',
+      joinedAt: 'Jan 15, 2023',
+      eventsCount: 12,
+      schedule: ['Show', 'Trail', 'Clinic', '', 'Grooming', 'Show', '']
+    },
+    {
+      id: 2,
+      name: 'Jordan Blake',
+      email: 'jordan@stables.local',
+      role: 'Instructor',
+      joinedAt: 'Mar 20, 2022',
+      eventsCount: 18,
+      schedule: ['Trail', '', 'Show', 'Clinic', 'Trail', '', 'Grooming']
+    },
+    {
+      id: 3,
+      name: 'Casey Turner',
+      email: 'casey@stables.local',
+      role: 'Volunteer',
+      joinedAt: 'Jun 1, 2024',
+      eventsCount: 5,
+      schedule: ['', 'Clinic', '', 'Show', '', 'Trail', 'Clinic']
+    },
+    {
+      id: 4,
+      name: 'Taylor Reeves',
+      email: 'taylor@stables.local',
+      role: 'Head Instructor',
+      joinedAt: 'Jan 10, 2020',
+      eventsCount: 42,
+      schedule: ['Show', 'Trail', '', 'Clinic', 'Show', 'Grooming', 'Show']
+    },
+    {
+      id: 5,
+      name: 'Morgan Chase',
+      email: 'morgan@stables.local',
+      role: 'Groom',
+      joinedAt: 'Apr 8, 2023',
+      eventsCount: 8,
+      schedule: ['', 'Show', 'Trail', '', 'Clinic', 'Show', '']
+    }
+  ];
+
+  const EVENTS = [
+    { id: 1, title: 'Summer Show', date: 'Jun 29, 2026', category: 'show' },
+    { id: 2, title: 'Trail Ride', date: 'Jun 25, 2026', category: 'trail' },
+    { id: 3, title: 'Clinic', date: 'Jun 27, 2026', category: 'clinic' },
+    { id: 4, title: 'Grooming Workshop', date: 'Jun 28, 2026', category: 'grooming' },
+  ];
+
+  function renderSchedule() {
+    const tbody = document.getElementById('scheduleBody');
+    tbody.innerHTML = STAFF.map(staff => `
+      <tr onclick="showDetail(${staff.id})">
+        <td class="staff-name">${staff.name}</td>
+        <td><span class="role-badge">${staff.role}</span></td>
+        ${staff.schedule.map(duty => `
+          <td class="duty-cell">
+            ${duty ? `<span class="duty-assigned">${duty}</span>` : '<span class="duty-available">—</span>'}
+          </td>
+        `).join('')}
+      </tr>
+    `).join('');
+  }
+
+  function showDetail(staffId) {
+    const staff = STAFF.find(s => s.id === staffId);
+    if (!staff) return;
+
+    document.getElementById('detailName').textContent = staff.name;
+    document.getElementById('detailRole').textContent = staff.role;
+    document.getElementById('detailEmail').textContent = staff.email;
+    document.getElementById('detailJoinedAt').textContent = staff.joinedAt;
+    document.getElementById('detailEventsCount').textContent = staff.eventsCount;
+
+    const eventList = document.getElementById('eventList');
+    eventList.innerHTML = EVENTS.slice(0, 3).map(event => `
+      <li class="event-item">
+        <div class="event-info">
+          <div class="event-title">${event.title}</div>
+          <div class="event-date">${event.date}</div>
+        </div>
+        <span class="event-badge">${event.category.charAt(0).toUpperCase() + event.category.slice(1)}</span>
+      </li>
+    `).join('');
+
+    document.getElementById('detailPanel').classList.add('active');
+  }
+
+  function closeDetail() {
+    document.getElementById('detailPanel').classList.remove('active');
+  }
+
+  renderSchedule();
+</script>
+
+</body>
+</html>
