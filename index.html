@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enchanted Stables — Prototype Gallery</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --color-primary:       #4f46e5;
+      --color-primary-hover: #4338ca;
+      --color-primary-light: #eef2ff;
+      --color-text:          #111827;
+      --color-text-secondary:#6b7280;
+      --color-text-muted:    #9ca3af;
+      --color-bg:            #f9fafb;
+      --color-surface:       #ffffff;
+      --color-border:        #e5e7eb;
+      --color-sidebar:       #1e293b;
+      --color-sidebar-text:  #94a3b8;
+      --radius-md:  0.5rem;
+      --radius-lg:  0.75rem;
+      --shadow-sm:  0 1px 3px 0 rgb(0 0 0/.07), 0 1px 2px -1px rgb(0 0 0/.07);
+      --shadow-md:  0 4px 6px -1px rgb(0 0 0/.1), 0 2px 4px -2px rgb(0 0 0/.1);
+      --sidebar-width: 256px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--color-bg);
+      color: var(--color-text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ─────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-width);
+      min-width: var(--sidebar-width);
+      background: var(--color-sidebar);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 0 1rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0 1.25rem 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--color-primary);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .brand-text {
+      color: #f1f5f9;
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .brand-sub {
+      color: var(--color-sidebar-text);
+      font-size: 0.72rem;
+      font-weight: 400;
+    }
+
+    .sidebar-label {
+      color: var(--color-sidebar-text);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 1.25rem 1.25rem 0.5rem;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 0 0.625rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-md);
+      color: var(--color-sidebar-text);
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      text-decoration: none;
+    }
+
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: #e2e8f0; }
+    .nav-item.active { background: rgba(79,70,229,0.25); color: #a5b4fc; }
+
+    /* ── Main ─────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .topbar-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+
+    .topbar-meta {
+      font-size: 0.8rem;
+      color: var(--color-text-secondary);
+    }
+
+    .content {
+      padding: 2rem;
+      flex: 1;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 0.35rem;
+    }
+
+    .page-subtitle {
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* ── Filter bar ───────────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 0.375rem 0.875rem;
+      border-radius: 999px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .filter-btn.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+
+    /* ── Cards grid ───────────────────────────────────── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--color-primary);
+      transform: translateY(-2px);
+    }
+
+    .card-thumb {
+      height: 6px;
+    }
+
+    .card-body {
+      padding: 1.25rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .card-category {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text);
+      line-height: 1.35;
+    }
+
+    .card-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .card-footer {
+      padding: 0.875rem 1.25rem;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .badge-approved { background: #dcfce7; color: #15803d; }
+    .badge-draft    { background: #fef9c3; color: #a16207; }
+    .badge-wip      { background: #e0e7ff; color: #4338ca; }
+
+    .open-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--color-primary);
+    }
+
+    /* ── Empty state ──────────────────────────────────── */
+    .empty {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--color-text-secondary);
+    }
+
+    .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .empty-title { font-size: 1rem; font-weight: 600; color: var(--color-text); margin-bottom: 0.35rem; }
+
+    /* ── Color accents per category ───────────────────── */
+    .accent-events   { background: #4f46e5; }
+    .accent-schedule { background: #0891b2; }
+    .accent-staff    { background: #059669; }
+    .accent-other    { background: #9333ea; }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">🐴</div>
+      <div>
+        <div class="brand-text">Enchanted Stables</div>
+        <div class="brand-sub">Prototype Gallery</div>
+      </div>
+    </div>
+    <div class="sidebar-label">Browse</div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" href="#" onclick="filter('all');return false;">
+        <span>🗂</span> All prototypes
+      </a>
+      <a class="nav-item" href="#" onclick="filter('events');return false;">
+        <span>📅</span> Events
+      </a>
+      <a class="nav-item" href="#" onclick="filter('schedule');return false;">
+        <span>🗓</span> Schedule
+      </a>
+      <a class="nav-item" href="#" onclick="filter('staff');return false;">
+        <span>👥</span> Staff
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title">Prototype Gallery</span>
+      <span class="topbar-meta">Clickable HTML prototypes — open any to interact</span>
+    </div>
+
+    <div class="content">
+      <div class="page-header">
+        <h1 class="page-title">All Prototypes</h1>
+        <p class="page-subtitle">Self-contained interactive mockups for the Enchanted Stables staff portal. Click a card to open the prototype.</p>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filter('all', this)">All</button>
+        <button class="filter-btn" onclick="filter('events', this)">Events</button>
+        <button class="filter-btn" onclick="filter('schedule', this)">Schedule</button>
+        <button class="filter-btn" onclick="filter('staff', this)">Staff</button>
+      </div>
+
+      <div class="cards" id="cards"></div>
+    </div>
+  </div>
+
+  <script>
+    const prototypes = [
+      {
+        id: 'bulk-actions',
+        title: 'Bulk Actions — Events',
+        category: 'events',
+        description: 'Select multiple events and deactivate them in one action. Includes a floating action bar, confirmation dialog, and success toast.',
+        status: 'approved',
+        flow: 'Select mode toggle → checkbox selection → floating action bar → confirm dialog → success toast',
+        href: './bulk-actions/index.html'
+      },
+      {
+        id: 'schedule',
+        title: 'Staff Duty Roster',
+        category: 'schedule',
+        description: 'Weekly roster showing which staff members are on duty each day. Click a staff member to view their details or remove them from a shift.',
+        status: 'approved',
+        flow: 'View roster → click staff member → detail panel → remove from day',
+        href: './schedule/index.html'
+      }
+    ];
+
+    const accentMap = { events: 'accent-events', schedule: 'accent-schedule', staff: 'accent-staff' };
+    const statusMap = { approved: ['badge-approved', 'Approved'], draft: ['badge-draft', 'Draft'], wip: ['badge-wip', 'WIP'] };
+
+    let activeFilter = 'all';
+
+    function render() {
+      const container = document.getElementById('cards');
+      const visible = activeFilter === 'all' ? prototypes : prototypes.filter(p => p.category === activeFilter);
+
+      if (!visible.length) {
+        container.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">No prototypes in this category yet</div><p>More coming soon.</p></div>';
+        return;
+      }
+
+      container.innerHTML = visible.map(p => {
+        const accent = accentMap[p.category] || 'accent-other';
+        const [badgeClass, badgeLabel] = statusMap[p.status] || statusMap.draft;
+        return `
+          <a class="card" href="${p.href}">
+            <div class="card-thumb ${accent}"></div>
+            <div class="card-body">
+              <div class="card-category">${p.category}</div>
+              <div class="card-title">${p.title}</div>
+              <div class="card-desc">${p.description}</div>
+              <div class="card-desc" style="font-size:0.75rem;color:var(--color-text-muted);margin-top:0.25rem;">
+                <strong style="color:var(--color-text-secondary)">Flow:</strong> ${p.flow}
+              </div>
+            </div>
+            <div class="card-footer">
+              <span class="badge ${badgeClass}">${badgeLabel}</span>
+              <span class="open-link">Open ↗</span>
+            </div>
+          </a>`;
+      }).join('');
+    }
+
+    function filter(cat, btn) {
+      activeFilter = cat;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>
